@@ -49,7 +49,7 @@ La solución propuesta consta de múltiples microservicios independientes (cada 
 
 ## 6. Patrón Honeycomb
 
-Organiza microservicios en “celdas” hexagonales por dominio, facilitando aislamiento y despliegue:
+Organiza microservicios en "celdas" hexagonales por dominio, facilitando aislamiento y despliegue:
 
 * Visualización clara de interdependencias.
 * Aislamiento de fallos y despliegues independientes.
@@ -65,14 +65,39 @@ go-service-name/
 │   ├─ usecase/          # Casos de uso
 │   ├─ port/             # Interfaces
 │   └─ adapter/          # Implementaciones de puertos
-│       ├─ inbound/      # HTTP, gRPC
+│       ├─ inbound/      # HTTP (Fiber), gRPC
 │       └─ outbound/     # DB, mensajería
+│           └─ db/       # Conexión y migración de base de datos
 ├─ pkg/                  # Código público (si aplica)
 ├─ config/               # Archivos YAML/TOML
-├─ Dockerfile
+├─ test/                 # Pruebas unitarias e integración
+│   ├─ unit/             # Table-driven tests, mocks
+│   └─ integration/      # Tests con httptest, DB en memoria
+├─ docker/               # Archivos y configuraciones Docker-compose
+│   └─ docker-compose.yml
+├─ Dockerfile            # Multi-stage build para binario Go
 ├─ go.mod
 └─ README.md
 ```
+
+### 7.1 Organización de la Base de Datos
+
+La gestión de la base de datos sigue una estructura organizada dentro del adaptador de base de datos (`adapter/outbound/db/`):
+
+1. **Configuración de Base de Datos** (`database.go`):
+   - Estructura de configuración con parámetros de conexión
+   - Función de inicialización de la base de datos
+   - Gestión de migraciones automáticas
+
+2. **Repositorios** (`*_repository.go`):
+   - Implementaciones de los puertos de repositorio
+   - Lógica de acceso a datos específica del dominio
+
+Esta organización asegura:
+- Separación clara de responsabilidades
+- Configuración centralizada de la base de datos
+- Gestión de migraciones fuera del `main.go`
+- Fácil mantenimiento y pruebas
 
 ## 8. Comunicación Entre Servicios
 
